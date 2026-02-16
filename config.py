@@ -3,11 +3,21 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
+def _get_secret(key: str) -> str:
+    """Read from Streamlit secrets (cloud) or env vars (local)."""
+    try:
+        import streamlit as st
+        return st.secrets[key]
+    except Exception:
+        return os.getenv(key)
+
+
 # API Keys
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
+OPENAI_API_KEY = _get_secret("OPENAI_API_KEY")
+ANTHROPIC_API_KEY = _get_secret("ANTHROPIC_API_KEY")
+SUPABASE_URL = _get_secret("SUPABASE_URL")
+SUPABASE_SERVICE_KEY = _get_secret("SUPABASE_SERVICE_KEY")
 
 # Embedding config
 EMBEDDING_MODEL = "text-embedding-3-small"

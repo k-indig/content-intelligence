@@ -55,8 +55,9 @@ if selected_type != "All":
 
 if len(date_range) == 2:
     start, end = pd.Timestamp(date_range[0]), pd.Timestamp(date_range[1])
+    has_date = filtered["post_date"].notna()
     filtered = filtered[
-        (filtered["post_date"] >= start) & (filtered["post_date"] <= end)
+        ~has_date | ((filtered["post_date"] >= start) & (filtered["post_date"] <= end))
     ]
 
 st.write(f"**{len(filtered)}** articles found")

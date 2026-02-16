@@ -1,0 +1,12 @@
+anthropic
+supabase
+python-dotenv
+scikit-learn
+numpy
+tiktoken
+pandas
+plotly
+streamlit
+openai
+beautifulsoup4
+markdownify

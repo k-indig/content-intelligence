@@ -1,9 +1,12 @@
+import re
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 
 from db.client import get_client, get_all_articles, get_article_by_id
 from auth import require_auth
+from config import SUBSTACK_BASE_URL
 
 st.set_page_config(page_title="Article Explorer", layout="wide")
 require_auth()
@@ -18,6 +21,9 @@ if df.empty:
     st.stop()
 
 df["post_date"] = pd.to_datetime(df["post_date"], errors="coerce")
+df["link"] = df["url_slug"].apply(
+    lambda s: f"{SUBSTACK_BASE_URL}/p/{re.sub(r'^[0-9]+[.]', '', s)}"
+)
 
 # Compute safe date bounds (drop NaT rows for the date picker)
 valid_dates = df["post_date"].dropna()
@@ -68,11 +74,14 @@ sort_asc = st.checkbox("Ascending", value=False)
 filtered = filtered.sort_values(sort_col, ascending=sort_asc)
 
 # Display table
-display_cols = ["title", "subtitle", "post_date", "type", "audience", "word_count"]
+display_cols = ["title", "subtitle", "post_date", "type", "word_count", "link"]
 st.dataframe(
     filtered[display_cols].reset_index(drop=True),
     use_container_width=True,
     height=400,
+    column_config={
+        "link": st.column_config.LinkColumn("Link", display_text="Open"),
+    },
 )
 
 # Expandable full-text view

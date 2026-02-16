@@ -15,7 +15,10 @@ from analysis.clustering import (
 )
 from config import DEFAULT_CLUSTER_COUNT
 
+from auth import require_auth
+
 st.set_page_config(page_title="Content Gap Analysis", layout="wide")
+require_auth()
 st.title("Content Gap Analysis")
 
 client = get_client()

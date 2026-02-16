@@ -3,8 +3,10 @@ import pandas as pd
 import plotly.express as px
 
 from db.client import get_client, get_all_articles, get_article_by_id
+from auth import require_auth
 
 st.set_page_config(page_title="Article Explorer", layout="wide")
+require_auth()
 st.title("Article Explorer")
 
 client = get_client()

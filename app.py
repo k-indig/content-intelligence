@@ -6,6 +6,38 @@ st.set_page_config(
     layout="wide",
 )
 
+
+def check_password():
+    """Simple password gate. Set APP_PASSWORD in Streamlit secrets or .env."""
+    try:
+        correct_password = st.secrets["APP_PASSWORD"]
+    except Exception:
+        import os
+        correct_password = os.getenv("APP_PASSWORD")
+
+    if not correct_password:
+        return True  # No password configured, skip gate
+
+    if "authenticated" not in st.session_state:
+        st.session_state["authenticated"] = False
+
+    if st.session_state["authenticated"]:
+        return True
+
+    st.title("Content Intelligence")
+    password = st.text_input("Enter password to continue", type="password")
+    if password:
+        if password == correct_password:
+            st.session_state["authenticated"] = True
+            st.rerun()
+        else:
+            st.error("Incorrect password.")
+    return False
+
+
+if not check_password():
+    st.stop()
+
 st.title("Content Intelligence")
 st.subheader("Growth Memo — AI-Powered Content Analysis")
 

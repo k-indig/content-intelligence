@@ -5,6 +5,7 @@ import streamlit as st
 from db.client import get_client, get_all_articles, get_article_by_id
 from analysis.linking import find_similar_chunks, suggest_internal_links
 from config import DEFAULT_SIMILAR_CHUNKS, DEFAULT_LINK_SUGGESTIONS, SUBSTACK_BASE_URL
+from auth import require_auth
 
 
 def _slug_to_url(slug: str) -> str:
@@ -12,6 +13,7 @@ def _slug_to_url(slug: str) -> str:
     return f"{SUBSTACK_BASE_URL}/p/{clean}"
 
 st.set_page_config(page_title="Internal Linking", layout="wide")
+require_auth()
 st.title("Internal Linking Suggestions")
 
 client = get_client()

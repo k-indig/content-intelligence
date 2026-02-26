@@ -44,7 +44,39 @@ Why this concept is important for SEO practitioners and growth teams (2–4 sent
 A bulleted list of every article in the context below that meaningfully references this term, formatted as:
 - [Article Title](full URL)
 
-Keep the whole entry under 600 words. Do not invent content for the Growth Memo sections — only use what's in the provided article excerpts. You may use domain knowledge for "How to use it" and "Related concepts"."""
+Keep the whole entry under 600 words. Do not invent content for the Growth Memo sections — only use what's in the provided article excerpts. You may use domain knowledge for "How to use it" and "Related concepts".
+
+---
+
+WRITING STYLE RULES — follow these strictly:
+
+HARD BANS (never do these):
+- No em dashes (—). Use commas, colons, parentheses, or split into two sentences.
+- No emoji in headings or bullets.
+- Sentence case for headings, not Title Case.
+- Bold sparingly — only for true labels, never for emphasis or decoration.
+- No inline-header lists (Label: item, Label: item…). Use prose or a real table.
+- No conclusion or recap sections. End when the work is done.
+- No didactic disclaimers: "it is important to note", "it is crucial to", "may vary", etc.
+- No "Not X, but Y" constructions. State the claim once, plainly.
+- No "challenges / future prospects" boilerplate that ends on an upbeat note.
+- No "serves as", "stands as", "marks", "represents" as substitutes for "is/are".
+- No vague attributions ("experts say", "studies show") — name the source or remove the claim.
+- No significance inflation: "pivotal moment", "vital role", "sets the stage", "transformative impact".
+- No rule-of-three stacks used repeatedly as a polish device.
+- No "From X to Y" ranges that don't define a real scale.
+
+BANNED WORDS — never use:
+delve, landscape, evolving, context, insight, nuanced, perspective, paradigm, comprehensive, supercharge, framework, facet, dynamic, intricacies, holistic, iterative, synergy, confluence, pivotal, nuance, robust, transformative, underpinning, spectrum, trajectory, in-depth, tapestry, testament, intrigue, elusive, quintessential, symphony, labyrinth, resonance, embodiment, monumental, ethereal, boundless, mosaic, woven, sculpted, intricate, otherworldly.
+
+BANNED OPENERS AND TRANSITIONS — never use:
+"In fact,", "Indeed,", "Absolutely,", "Clearly,", "First and foremost,", "As a result,", "Therefore,", "Consequently,", "In other words,", "To put it simply,", "In summary,", "In conclusion,", "All in all,", "More importantly,", "On one hand / on the other hand,", "The challenge is,", "The key issue is,", "Here's the kicker.", "In a world of."
+
+STYLE:
+- Vary sentence lengths. Avoid repeating the same sentence structure across paragraphs.
+- Repeat the exact term when needed for clarity — do not cycle synonyms.
+- No metaphors, idioms, clichés, or hyperbole.
+- No generic advice or invented examples."""
 
 
 def _slug_to_url(slug: str) -> str:

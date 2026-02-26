@@ -30,14 +30,21 @@ A clear, concise definition (2–4 sentences). Base this on how Kevin has descri
 **Why it matters**
 Why this concept is important for SEO practitioners and growth teams (2–4 sentences). Ground it in the practical implications Kevin has written about.
 
-**From Growth Memo**
+**How to use it**
+2–4 concrete, actionable steps or approaches for applying this concept. Frame it for practitioners — what would a growth team or SEO lead actually do with this? Base it on the provided excerpts where possible; use domain knowledge to fill gaps.
+
+**From Growth Memo:**
 2–3 direct insights or quotes from Kevin's actual articles below. Use the exact wording where possible, or paraphrase closely. Each insight should be followed by its source in parentheses: (Source: [Article Title])
+
+**Related concepts**
+3–5 closely related terms, each with a one-sentence explanation of how it connects. Example format:
+- **Content clusters** — the structural method for building topical authority
 
 **Referenced in these Growth Memos**
 A bulleted list of every article in the context below that meaningfully references this term, formatted as:
 - [Article Title](full URL)
 
-Keep the whole entry under 400 words. Do not invent content — only use what's in the provided article excerpts."""
+Keep the whole entry under 600 words. Do not invent content for the Growth Memo sections — only use what's in the provided article excerpts. You may use domain knowledge for "How to use it" and "Related concepts"."""
 
 
 def _slug_to_url(slug: str) -> str:
@@ -71,7 +78,7 @@ def build_glossary_entry(term: str, chunks: list[dict]) -> str:
 
     response = client.messages.create(
         model=CLAUDE_MODEL,
-        max_tokens=1500,
+        max_tokens=2000,
         system=SYSTEM_PROMPT,
         messages=[
             {

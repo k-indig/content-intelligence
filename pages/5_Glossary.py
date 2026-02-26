@@ -30,7 +30,7 @@ A clear, concise definition (2–4 sentences). Base this on how Kevin has descri
 **Why it matters**
 Why this concept is important for SEO practitioners and growth teams (2–4 sentences). Ground it in the practical implications Kevin has written about.
 
-**As Kevin has written about it**
+**From Growth Memo**
 2–3 direct insights or quotes from Kevin's actual articles below. Use the exact wording where possible, or paraphrase closely. Each insight should be followed by its source in parentheses: (Source: [Article Title])
 
 **Referenced in these Growth Memos**

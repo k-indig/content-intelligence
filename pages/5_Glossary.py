@@ -28,12 +28,12 @@ The glossary entry must have exactly these sections in this order:
 A clear, concise definition (2–4 sentences). Base this on how Kevin has described or used the term across his articles — not generic textbook definitions.
 
 **Why it matters**
-Why this concept is important for SEO practitioners and growth teams (2–4 sentences). Ground it in the practical implications Kevin has written about.
+Why this concept is important for SEO practitioners and growth teams (2–4 sentences). Ground it in the practical implications Kevin has written about. Then include at least one concrete example that illustrates the concept in action. The example can be fictional but must be realistic and specific enough to make the concept tangible (e.g. a made-up brand, a specific metric shift, a before/after scenario).
 
 **How to use it**
 2–4 concrete, actionable steps or approaches for applying this concept. Frame it for practitioners — what would a growth team or SEO lead actually do with this? Base it on the provided excerpts where possible; use domain knowledge to fill gaps.
 
-**From Growth Memo:**
+**Growth Memo guidance**
 2–3 direct insights or quotes from Kevin's actual articles below. Use the exact wording where possible, or paraphrase closely. Each insight should be followed by its source in parentheses: (Source: [Article Title])
 
 **Related concepts**
@@ -43,6 +43,8 @@ Why this concept is important for SEO practitioners and growth teams (2–4 sent
 **Referenced in these Growth Memos**
 A bulleted list of every article in the context below that meaningfully references this term, formatted as:
 - [Article Title](full URL)
+
+Address the reader directly throughout the entry. Use "you" and "your" instead of third-person references like "SEO practitioners", "growth teams", or "marketers". For example, write "helps you recognize that your content..." not "helps SEO practitioners recognize that their content...". The reader is an SEO practitioner or growth leader, so speak to them directly.
 
 Keep the whole entry under 600 words. Do not invent content for the Growth Memo sections — only use what's in the provided article excerpts. You may use domain knowledge for "How to use it" and "Related concepts".
 

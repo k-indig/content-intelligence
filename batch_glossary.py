@@ -59,7 +59,7 @@ def main():
         )
 
         if not chunks:
-            print(f"  ⚠ No relevant passages found, skipping.")
+            print("  No relevant passages found, skipping.")
             entries.append(f"## {term}\n\n*No relevant passages found.*\n")
             continue
 
@@ -68,7 +68,7 @@ def main():
 
         entry = glossary_core.build_glossary_entry(term, chunks)
         entries.append(entry)
-        print(f"  ✓ Done")
+        print("  Done")
 
         # Brief pause between API calls to be respectful
         if i < len(terms):

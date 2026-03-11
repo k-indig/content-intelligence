@@ -16,7 +16,7 @@ import time
 
 from db.client import get_client, match_chunks
 from ingestion.embed import embed_single
-from pages import glossary_core
+import glossary_core
 
 
 def load_terms(path: str) -> list[str]:

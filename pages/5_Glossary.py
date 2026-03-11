@@ -3,7 +3,7 @@ import streamlit as st
 from auth import require_auth
 from db.client import get_client, match_chunks
 from ingestion.embed import embed_single
-from pages.glossary_core import build_glossary_entry, slug_to_url
+from glossary_core import build_glossary_entry, slug_to_url
 
 st.set_page_config(page_title="Glossary Builder", layout="wide")
 require_auth()

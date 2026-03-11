@@ -76,6 +76,29 @@ def slug_to_url(slug: str) -> str:
     return f"{SUBSTACK_BASE_URL}/p/{clean}"
 
 
+def _dedup_references(text: str) -> str:
+    """Remove duplicate bullet lines in the 'Referenced in these Growth Memos' section."""
+    marker = "**Referenced in these Growth Memos**"
+    idx = text.find(marker)
+    if idx == -1:
+        return text
+
+    before = text[:idx + len(marker)]
+    after = text[idx + len(marker):]
+
+    seen = set()
+    deduped_lines = []
+    for line in after.split("\n"):
+        stripped = line.strip()
+        if stripped.startswith("- "):
+            if stripped in seen:
+                continue
+            seen.add(stripped)
+        deduped_lines.append(line)
+
+    return before + "\n".join(deduped_lines)
+
+
 def build_glossary_entry(term: str, chunks: list[dict]) -> str:
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
@@ -110,4 +133,4 @@ def build_glossary_entry(term: str, chunks: list[dict]) -> str:
             }
         ],
     )
-    return response.content[0].text
+    return _dedup_references(response.content[0].text)

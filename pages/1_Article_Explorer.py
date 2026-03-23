@@ -21,8 +21,10 @@ if df.empty:
     st.stop()
 
 df["post_date"] = pd.to_datetime(df["post_date"], errors="coerce", utc=True).dt.tz_localize(None)
-df["link"] = df["url_slug"].apply(
-    lambda s: f"{SUBSTACK_BASE_URL}/p/{re.sub(r'^[0-9]+[.]', '', s)}"
+df["link"] = df.apply(
+    lambda r: f"{SUBSTACK_BASE_URL}/p/{re.sub(r'^[0-9]+[.]', '', r['url_slug'])}"
+    if r.get("type") in ("newsletter", "podcast", "thread") else "",
+    axis=1,
 )
 
 # Compute safe date bounds (drop NaT rows for the date picker)

@@ -20,7 +20,7 @@ if df.empty:
     st.warning("No articles found. Run the ingestion pipeline first.")
     st.stop()
 
-df["post_date"] = pd.to_datetime(df["post_date"], errors="coerce")
+df["post_date"] = pd.to_datetime(df["post_date"], errors="coerce", utc=True).dt.tz_localize(None)
 df["link"] = df["url_slug"].apply(
     lambda s: f"{SUBSTACK_BASE_URL}/p/{re.sub(r'^[0-9]+[.]', '', s)}"
 )

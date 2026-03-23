@@ -63,12 +63,14 @@ def compute_tsne(article_embeddings: dict, article_ids: list) -> np.ndarray:
     return tsne.fit_transform(X)
 
 
-def label_clusters_with_claude(clusters: dict, feedback: list[dict] = None) -> dict:
+def label_clusters_with_claude(clusters: dict, feedback: list[dict] = None,
+                               cluster_perf: dict = None) -> dict:
     """Use Claude to label each cluster and suggest content gaps.
 
     Args:
         clusters: {cluster_id: [list of article titles]}
         feedback: list of dicts with cluster_label, suggestion, rating ('up'/'down')
+        cluster_perf: {cluster_id: {"total_clicks": int, "avg_ctr": float, "top_article": str}}
 
     Returns:
         {cluster_id: {"label": str, "gaps": [str]}}
@@ -78,7 +80,17 @@ def label_clusters_with_claude(clusters: dict, feedback: list[dict] = None) -> d
     cluster_descriptions = []
     for cid, titles in sorted(clusters.items()):
         titles_str = "\n".join(f"  - {t}" for t in titles[:20])
-        cluster_descriptions.append(f"Cluster {cid} ({len(titles)} articles):\n{titles_str}")
+        perf_line = ""
+        if cluster_perf and cid in cluster_perf:
+            p = cluster_perf[cid]
+            perf_line = (
+                f"\n  Performance: {p['total_clicks']} clicks/wk, "
+                f"avg CTR {p['avg_ctr']:.1%}, "
+                f"top article: \"{p['top_article']}\""
+            )
+        cluster_descriptions.append(
+            f"Cluster {cid} ({len(titles)} articles):{perf_line}\n{titles_str}"
+        )
 
     feedback_block = ""
     if feedback:
@@ -91,8 +103,17 @@ def label_clusters_with_claude(clusters: dict, feedback: list[dict] = None) -> d
             if disliked:
                 feedback_block += "Suggestions the user DISLIKED (avoid this style/type):\n" + "\n".join(disliked) + "\n"
 
+    perf_instruction = ""
+    if cluster_perf:
+        perf_instruction = (
+            "\nEach cluster includes traffic performance data. "
+            "Prioritize gap suggestions for high-traffic clusters since those represent "
+            "proven topic areas with audience demand. For lower-traffic clusters, suggest gaps "
+            "only if the topic has clear growth potential.\n"
+        )
+
     prompt = f"""You are analyzing topic clusters from a newsletter called "Growth Memo" about SEO, organic growth, and digital marketing.
-{feedback_block}
+{feedback_block}{perf_instruction}
 Below are article clusters with their titles. For each cluster:
 1. Give a short topic label (2-4 words)
 2. Suggest 2-3 specific subtopics NOT yet covered that would be valuable additions

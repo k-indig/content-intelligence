@@ -4,7 +4,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-from db.client import get_client, get_all_articles, get_article_by_id
+from db.client import get_client, get_all_articles, get_article_by_id, get_latest_metrics
 from auth import require_auth
 from config import SUBSTACK_BASE_URL
 
@@ -26,6 +26,18 @@ df["link"] = df.apply(
     if r.get("type") in ("newsletter", "podcast", "thread") else "",
     axis=1,
 )
+
+# Join performance metrics if available
+metrics = get_latest_metrics(client)
+if metrics:
+    metrics_df = pd.DataFrame(metrics)[["url_slug", "clicks", "impressions", "ctr"]]
+    df = df.merge(metrics_df, on="url_slug", how="left")
+    df[["clicks", "impressions"]] = df[["clicks", "impressions"]].fillna(0).astype(int)
+    df["ctr"] = df["ctr"].fillna(0.0)
+else:
+    df["clicks"] = 0
+    df["impressions"] = 0
+    df["ctr"] = 0.0
 
 # Compute safe date bounds (drop NaT rows for the date picker)
 valid_dates = df["post_date"].dropna()
@@ -71,12 +83,19 @@ if len(date_range) == 2:
 st.write(f"**{len(filtered)}** articles found")
 
 # Sortable table
-sort_col = st.selectbox("Sort by", ["post_date", "title", "word_count"], index=0)
+sort_options = ["post_date", "title", "word_count"]
+if metrics:
+    sort_options.extend(["clicks", "impressions"])
+sort_col = st.selectbox("Sort by", sort_options, index=0)
 sort_asc = st.checkbox("Ascending", value=False)
 filtered = filtered.sort_values(sort_col, ascending=sort_asc)
 
 # Display table
-display_cols = ["title", "subtitle", "post_date", "type", "word_count", "link"]
+display_cols = ["title", "subtitle", "post_date", "type", "word_count"]
+if metrics:
+    display_cols.extend(["clicks", "impressions", "ctr"])
+display_cols.append("link")
+
 st.dataframe(
     filtered[display_cols].reset_index(drop=True),
     use_container_width=True,

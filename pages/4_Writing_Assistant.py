@@ -2,8 +2,9 @@ import re
 
 import streamlit as st
 
-from db.client import get_client, get_all_articles
+from db.client import get_client, get_all_articles, get_latest_metrics, get_article_queries
 from analysis.linking import find_similar_chunks
+from analysis.performance import get_performance_scores, get_performance_tier, get_top_queries_for_slugs
 from auth import require_auth
 from config import ANTHROPIC_API_KEY, CLAUDE_MODEL, SUBSTACK_BASE_URL
 import anthropic
@@ -13,7 +14,7 @@ require_auth()
 st.title("Writing Assistant")
 st.caption(
     "Describe a topic or paste an outline. Claude will retrieve your relevant past articles "
-    "and write a new draft that builds on — without repeating — what you've already covered."
+    "and write a new draft that builds on -- without repeating -- what you've already covered."
 )
 
 
@@ -22,8 +23,34 @@ def _slug_to_url(slug: str) -> str:
     return f"{SUBSTACK_BASE_URL}/p/{clean}"
 
 
-def _get_style_examples(client, n=3) -> list[dict]:
-    """Fetch a few recent articles to give Claude a voice reference."""
+def _get_style_examples(client, perf_scores: dict, n=3) -> list[dict]:
+    """Fetch top-performing articles for voice reference.
+
+    Falls back to most recent articles if no performance data exists.
+    """
+    if perf_scores:
+        metrics = get_latest_metrics(client)
+        if metrics:
+            slug_scores = sorted(
+                [(m["url_slug"], perf_scores.get(m["url_slug"], 0)) for m in metrics],
+                key=lambda x: -x[1],
+            )
+            top_slugs = [s for s, _ in slug_scores[:n]]
+            results = []
+            for slug in top_slugs:
+                rows = (
+                    client.table("articles")
+                    .select("title, full_text_markdown")
+                    .eq("url_slug", slug)
+                    .limit(1)
+                    .execute()
+                ).data
+                if rows:
+                    results.append(rows[0])
+            if results:
+                return results
+
+    # Fallback: most recent
     result = (
         client.table("articles")
         .select("title, full_text_markdown")
@@ -35,27 +62,56 @@ def _get_style_examples(client, n=3) -> list[dict]:
 
 
 def draft_article(topic: str, similar_chunks: list[dict], style_examples: list[dict],
-                  mode: str, word_count: int) -> str:
+                  mode: str, word_count: int, perf_scores: dict = None,
+                  query_context: dict = None) -> str:
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
-    # Build context from similar past articles
+    # Build context with performance-weighted allocation
     seen_articles = {}
     for chunk in similar_chunks:
         aid = chunk["article_id"]
         if aid not in seen_articles:
+            slug = chunk["article_url_slug"]
+            ps = perf_scores.get(slug, 0.0) if perf_scores else 0.0
+            tier = get_performance_tier(ps) if perf_scores else "mid"
+            # Allocate more excerpts to top performers
+            max_excerpts = {"top": 4, "mid": 2, "low": 1}.get(tier, 2)
             seen_articles[aid] = {
                 "title": chunk["article_title"],
-                "url": _slug_to_url(chunk["article_url_slug"]),
+                "slug": slug,
+                "url": _slug_to_url(slug),
                 "excerpts": [],
+                "max_excerpts": max_excerpts,
+                "tier": tier,
+                "score": ps,
             }
-        seen_articles[aid]["excerpts"].append(chunk["chunk_text"][:600])
+        info = seen_articles[aid]
+        if len(info["excerpts"]) < info["max_excerpts"]:
+            info["excerpts"].append(chunk["chunk_text"][:600])
 
     past_context = []
     for info in seen_articles.values():
-        excerpts = "\n\n".join(info["excerpts"][:2])
+        excerpts = "\n\n".join(info["excerpts"])
+        perf_label = ""
+        if perf_scores:
+            perf_label = f" [{'TOP PERFORMER' if info['tier'] == 'top' else info['tier']}]"
         past_context.append(
-            f"Article: \"{info['title']}\" ({info['url']})\n{excerpts}"
+            f'Article: "{info["title"]}"{perf_label} ({info["url"]})\n{excerpts}'
         )
+
+    # GSC query context
+    query_block = ""
+    if query_context:
+        all_queries = []
+        for slug, queries in query_context.items():
+            all_queries.extend(queries)
+        if all_queries:
+            unique_queries = list(dict.fromkeys(all_queries))[:15]
+            query_block = (
+                "\n\nPROVEN SEARCH QUERIES (these drive real traffic to related articles -- "
+                "weave these angles/keywords naturally into the draft):\n"
+                + ", ".join(f'"{q}"' for q in unique_queries)
+            )
 
     # Style examples
     style_block = ""
@@ -83,21 +139,28 @@ def draft_article(topic: str, similar_chunks: list[dict], style_examples: list[d
             "For each angle: give a working title, a 2-sentence pitch, and explain how it differs from or builds on past coverage."
         )
 
+    perf_instruction = ""
+    if perf_scores:
+        perf_instruction = (
+            "\nArticles marked TOP PERFORMER have proven audience resonance. "
+            "Prioritize their structure, framing, and angles as inspiration.\n"
+        )
+
     prompt = f"""You are a writing assistant for Kevin Indig, author of the "Growth Memo" newsletter about SEO, organic growth, and digital marketing.
 
-Kevin's writing style (recent articles for reference):
+Kevin's writing style (top-performing articles for reference):
 {style_block}
 
-RELATED PAST ARTICLES (use these as context — build on them, don't repeat them):
-{chr(10).join(past_context)}
-
+RELATED PAST ARTICLES (use these as context -- build on them, don't repeat them):
+{chr(10).join(past_context)}{query_block}
+{perf_instruction}
 TOPIC / INPUT FROM KEVIN:
 {topic}
 
 TASK:
 {instruction}
 
-Important: Match Kevin's voice closely — direct, analytical, data-informed, practitioner-focused. Avoid generic SEO advice."""
+Important: Match Kevin's voice closely -- direct, analytical, data-informed, practitioner-focused. Avoid generic SEO advice."""
 
     response = client.messages.create(
         model=CLAUDE_MODEL,
@@ -109,6 +172,7 @@ Important: Match Kevin's voice closely — direct, analytical, data-informed, pr
 
 # UI
 client = get_client()
+perf_scores = get_performance_scores(client)
 
 col1, col2 = st.columns([3, 1])
 with col1:
@@ -131,12 +195,17 @@ if st.button("Generate", disabled=not topic.strip()):
             client, topic,
             match_count=20,
             similarity_threshold=similarity_threshold,
+            perf_scores=perf_scores,
         )
-        style_examples = _get_style_examples(client, n=3)
+        style_examples = _get_style_examples(client, perf_scores, n=3)
 
     if not similar:
         st.warning("No closely related past articles found. Try lowering Context sensitivity.")
         st.stop()
+
+    # Collect slugs for GSC query injection
+    seen_slugs = list({c["article_url_slug"] for c in similar})
+    query_context = get_top_queries_for_slugs(client, seen_slugs, n=5) if perf_scores else {}
 
     # Show which past articles are being used as context
     seen = {}
@@ -150,7 +219,8 @@ if st.button("Generate", disabled=not topic.strip()):
             st.markdown(f"- [{info['title']}]({info['url']})")
 
     with st.spinner(f"Claude is writing your {mode.lower()}..."):
-        result = draft_article(topic, similar, style_examples, mode, word_count)
+        result = draft_article(topic, similar, style_examples, mode, word_count,
+                               perf_scores=perf_scores, query_context=query_context)
 
     st.subheader(mode)
     st.markdown(result)

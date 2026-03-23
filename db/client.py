@@ -186,3 +186,16 @@ def get_all_article_queries_latest(client) -> list[dict]:
         .order("impressions", desc=True)
         .execute()
     ).data
+
+
+def get_demand_gap_queries(client, min_impressions: int = 100, min_position: float = 20.0) -> list[dict]:
+    """Fetch high-impression, low-ranking queries (content gap signals)."""
+    return (
+        client.table("article_queries")
+        .select("url_slug, query, clicks, impressions, ctr, avg_position")
+        .gte("impressions", min_impressions)
+        .gte("avg_position", min_position)
+        .order("impressions", desc=True)
+        .limit(100)
+        .execute()
+    ).data

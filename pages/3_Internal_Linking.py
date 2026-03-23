@@ -4,6 +4,7 @@ import streamlit as st
 
 from db.client import get_client, get_all_articles, get_article_by_id
 from analysis.linking import find_similar_chunks, suggest_internal_links
+from analysis.performance import get_performance_scores
 from config import DEFAULT_SIMILAR_CHUNKS, DEFAULT_LINK_SUGGESTIONS, SUBSTACK_BASE_URL
 from auth import require_auth
 
@@ -21,11 +22,14 @@ client = get_client()
 mode = st.radio("Input mode", ["Select existing article", "Paste a draft"])
 
 # Settings
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns(3)
 with col1:
     similarity_threshold = st.slider("Similarity threshold", 0.3, 0.9, 0.5, 0.05)
 with col2:
     match_count = st.slider("Similar chunks to retrieve", 5, 30, DEFAULT_SIMILAR_CHUNKS)
+with col3:
+    use_performance = st.toggle("Weight by performance", value=True,
+                                help="Boost suggestions from high-traffic articles")
 
 source_title = ""
 source_text = ""
@@ -56,12 +60,15 @@ else:
         pass  # Will proceed below
 
 if source_title and source_text:
+    perf_scores = get_performance_scores(client) if use_performance else {}
+
     with st.spinner("Finding similar content..."):
         similar = find_similar_chunks(
             client, source_text,
             match_count=match_count,
             similarity_threshold=similarity_threshold,
             exclude_article_id=exclude_id,
+            perf_scores=perf_scores,
         )
 
     if not similar:
@@ -94,6 +101,7 @@ if source_title and source_text:
         suggestions = suggest_internal_links(
             source_title, source_text, similar,
             max_suggestions=DEFAULT_LINK_SUGGESTIONS,
+            perf_scores=perf_scores,
         )
 
     st.subheader("Linking Suggestions")

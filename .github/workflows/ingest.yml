@@ -8,6 +8,9 @@ on:
       max_articles:
         description: "Max new articles to ingest"
         default: "20"
+      analytics_weeks:
+        description: "Weeks of analytics to backfill"
+        default: "2"
 
 jobs:
   ingest:
@@ -45,4 +48,4 @@ jobs:
           GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
           GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-        run: python -m ingestion.ingest_analytics --weeks 2
+        run: python -m ingestion.ingest_analytics --weeks ${{ github.event.inputs.analytics_weeks || '2' }}

@@ -96,3 +96,93 @@ def get_all_gap_feedback(client) -> list[dict]:
     """Fetch all gap feedback for use in prompts."""
     result = client.table("gap_feedback").select("*").execute()
     return result.data
+
+
+# ── Analytics (GA4 + GSC) ────────────────────────────────────────────────────
+
+def upsert_article_metrics(client, rows: list[dict]):
+    """Upsert article_metrics rows in batches."""
+    BATCH = 50
+    for i in range(0, len(rows), BATCH):
+        batch = rows[i : i + BATCH]
+        client.table("article_metrics").upsert(
+            batch, on_conflict="url_slug,week_start"
+        ).execute()
+
+
+def upsert_article_queries(client, rows: list[dict]):
+    """Upsert article_queries rows in batches."""
+    BATCH = 50
+    for i in range(0, len(rows), BATCH):
+        batch = rows[i : i + BATCH]
+        client.table("article_queries").upsert(
+            batch, on_conflict="url_slug,week_start,query"
+        ).execute()
+
+
+def get_latest_metrics(client) -> list[dict]:
+    """Fetch the most recent week's metrics for all articles."""
+    latest = (
+        client.table("article_metrics")
+        .select("week_start")
+        .order("week_start", desc=True)
+        .limit(1)
+        .execute()
+    )
+    if not latest.data:
+        return []
+    week = latest.data[0]["week_start"]
+    return (
+        client.table("article_metrics")
+        .select("*")
+        .eq("week_start", week)
+        .execute()
+    ).data
+
+
+def get_article_metrics(client, url_slug: str = None) -> list[dict]:
+    """Fetch article metrics, optionally filtered by slug."""
+    query = client.table("article_metrics").select("*").order("week_start", desc=True)
+    if url_slug:
+        query = query.eq("url_slug", url_slug)
+    return query.execute().data
+
+
+def get_article_queries(client, url_slug: str, week_start: str = None) -> list[dict]:
+    """Fetch query-level GSC data for an article."""
+    query = (
+        client.table("article_queries")
+        .select("*")
+        .eq("url_slug", url_slug)
+        .order("impressions", desc=True)
+    )
+    if week_start:
+        query = query.eq("week_start", week_start)
+    return query.execute().data
+
+
+def get_existing_metric_weeks(client) -> set[tuple[str, str]]:
+    """Return set of (url_slug, week_start) pairs already in article_metrics."""
+    result = client.table("article_metrics").select("url_slug, week_start").execute()
+    return {(r["url_slug"], r["week_start"]) for r in result.data}
+
+
+def get_all_article_queries_latest(client) -> list[dict]:
+    """Fetch query-level data for the latest week across all articles."""
+    latest = (
+        client.table("article_metrics")
+        .select("week_start")
+        .order("week_start", desc=True)
+        .limit(1)
+        .execute()
+    )
+    if not latest.data:
+        return []
+    week = latest.data[0]["week_start"]
+    return (
+        client.table("article_queries")
+        .select("*")
+        .eq("week_start", week)
+        .order("impressions", desc=True)
+        .execute()
+    ).data

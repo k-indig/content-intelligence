@@ -73,3 +73,42 @@ begin
   limit match_count;
 end;
 $$;
+
+-- Weekly GA4 + GSC page-level metrics per article
+create table if not exists article_metrics (
+  id bigint generated always as identity primary key,
+  url_slug text not null,
+  week_start date not null,
+  -- GA4 metrics
+  pageviews integer default 0,
+  sessions integer default 0,
+  avg_engagement_time_seconds float default 0,
+  bounce_rate float default 0,
+  -- GSC metrics
+  clicks integer default 0,
+  impressions integer default 0,
+  ctr float default 0,
+  avg_position float default 0,
+  created_at timestamptz default now(),
+  unique (url_slug, week_start)
+);
+
+create index if not exists article_metrics_slug_idx on article_metrics(url_slug);
+create index if not exists article_metrics_week_idx on article_metrics(week_start);
+
+-- GSC query-level data per article per week
+create table if not exists article_queries (
+  id bigint generated always as identity primary key,
+  url_slug text not null,
+  week_start date not null,
+  query text not null,
+  clicks integer default 0,
+  impressions integer default 0,
+  ctr float default 0,
+  avg_position float default 0,
+  created_at timestamptz default now(),
+  unique (url_slug, week_start, query)
+);
+
+create index if not exists article_queries_slug_idx on article_queries(url_slug);
+create index if not exists article_queries_week_idx on article_queries(week_start);

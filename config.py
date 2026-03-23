@@ -39,3 +39,8 @@ CLAUDE_MODEL = "claude-sonnet-4-5-20250929"
 
 # Newsletter config
 SUBSTACK_BASE_URL = "https://www.growth-memo.com"
+
+# Google Analytics / Search Console config
+GA4_PROPERTY_ID = _get_secret("GA4_PROPERTY_ID")
+GSC_SITE_URL = _get_secret("GSC_SITE_URL")
+GOOGLE_SERVICE_ACCOUNT_JSON = _get_secret("GOOGLE_SERVICE_ACCOUNT_JSON")

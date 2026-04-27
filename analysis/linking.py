@@ -14,6 +14,50 @@ def _slug_to_url(slug: str) -> str:
     return f"{SUBSTACK_BASE_URL}/p/{clean}"
 
 
+def _clean_slug(slug: str) -> str:
+    return re.sub(r"^\d+\.", "", slug or "")
+
+
+def _extract_linked_slugs(text: str) -> set[str]:
+    """Extract /p/<slug> values from markdown links in text, regardless of domain."""
+    slugs = set()
+    for url in re.findall(r"\[[^\]]+\]\(([^)]+)\)", text or ""):
+        m = re.search(r"/p/([^/?#)]+)", url)
+        if m:
+            slugs.add(m.group(1))
+    return slugs
+
+
+def _normalize_for_match(text: str) -> str:
+    """Strip light markdown so anchor-quote matching survives bold/italic/links."""
+    text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text or "")
+    text = re.sub(r"[*_`]+", "", text)
+    text = re.sub(r"\s+", " ", text)
+    return text.lower()
+
+
+def _validate_anchors(suggestions_md: str, source_text: str) -> str:
+    """Annotate suggestion blocks whose anchor text doesn't appear in source."""
+    source_normalized = _normalize_for_match(source_text)
+
+    sections = re.split(r"(?m)^(?=### Link)", suggestions_md)
+    out = []
+    for section in sections:
+        if not section.startswith("### Link"):
+            out.append(section)
+            continue
+        anchor_match = re.search(r'\*\*Anchor text:\*\*\s*"([^"]+)"', section)
+        if anchor_match:
+            anchor_normalized = _normalize_for_match(anchor_match.group(1))
+            if anchor_normalized and anchor_normalized not in source_normalized:
+                section = section.rstrip() + (
+                    "\n\n> **Warning:** Anchor not found verbatim in source. "
+                    "Claude may have paraphrased — search your draft for a close match.\n"
+                )
+        out.append(section)
+    return "".join(out)
+
+
 def find_similar_chunks(client, text: str, match_count: int = 15,
                         similarity_threshold: float = 0.5,
                         exclude_article_id: int = None,
@@ -42,6 +86,9 @@ def suggest_internal_links(source_title: str, source_text: str,
     """Use Claude to suggest specific internal links with anchor text."""
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
+    # Skip destinations the source already links to.
+    already_linked_slugs = _extract_linked_slugs(source_text)
+
     # Keep only the best chunk per destination article so Claude can't
     # suggest the same link twice. similar_chunks is already ordered by
     # relevance (and reranked by performance when applicable), so the
@@ -49,11 +96,16 @@ def suggest_internal_links(source_title: str, source_text: str,
     deduped_chunks = []
     seen_article_ids = set()
     for chunk in similar_chunks:
+        if _clean_slug(chunk.get("article_url_slug", "")) in already_linked_slugs:
+            continue
         aid = chunk.get("article_id")
         if aid in seen_article_ids:
             continue
         seen_article_ids.add(aid)
         deduped_chunks.append(chunk)
+
+    if not deduped_chunks:
+        return "_No new linking opportunities — every similar article is already linked from the source._"
 
     chunks_context = []
     for i, chunk in enumerate(deduped_chunks):
@@ -107,4 +159,4 @@ Format each suggestion in markdown:
         max_tokens=2000,
         messages=[{"role": "user", "content": prompt}],
     )
-    return response.content[0].text
+    return _validate_anchors(response.content[0].text, source_text)

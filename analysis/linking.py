@@ -42,8 +42,21 @@ def suggest_internal_links(source_title: str, source_text: str,
     """Use Claude to suggest specific internal links with anchor text."""
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
+    # Keep only the best chunk per destination article so Claude can't
+    # suggest the same link twice. similar_chunks is already ordered by
+    # relevance (and reranked by performance when applicable), so the
+    # first occurrence of each article_id is the one to keep.
+    deduped_chunks = []
+    seen_article_ids = set()
+    for chunk in similar_chunks:
+        aid = chunk.get("article_id")
+        if aid in seen_article_ids:
+            continue
+        seen_article_ids.add(aid)
+        deduped_chunks.append(chunk)
+
     chunks_context = []
-    for i, chunk in enumerate(similar_chunks):
+    for i, chunk in enumerate(deduped_chunks):
         url = _slug_to_url(chunk["article_url_slug"])
         perf_line = ""
         if perf_scores:
@@ -75,10 +88,12 @@ SOURCE ARTICLE: "{source_title}"
 SIMILAR CONTENT FROM OTHER ARTICLES:
 {chr(10).join(chunks_context)}
 
-Suggest {max_suggestions} specific internal links to add to the source article. For each suggestion:
+Suggest up to {max_suggestions} specific internal links to add to the source article. For each suggestion:
 1. Quote the exact phrase in the source article that should become the anchor text
 2. Specify which article to link to with its full URL
 3. Explain why this link adds value for the reader
+
+IMPORTANT: Each suggestion must link to a different destination article. Never suggest two links to the same URL. If you cannot find {max_suggestions} distinct destinations worth linking to, return fewer suggestions rather than repeating a destination.
 
 Format each suggestion in markdown:
 ### Link [number]

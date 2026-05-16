@@ -61,17 +61,33 @@ def get_all_chunk_embeddings(client) -> list[dict]:
 
 
 def match_chunks(client, query_embedding: list[float], match_count=15,
-                 similarity_threshold=0.5, exclude_article_id=None) -> list[dict]:
-    """Call the match_chunks RPC function."""
+                 similarity_threshold=0.5, exclude_article_id=None,
+                 exclude_linkedin=True) -> list[dict]:
+    """Call the match_chunks RPC function.
+
+    When exclude_linkedin is True (the default), chunks from LinkedIn cross-posts
+    are filtered out so retrieval-based tools (glossary, internal linking) only
+    surface full newsletter articles. LinkedIn posts have slugs starting with
+    "linkedin." or "linkedin-" (e.g. linkedin.2025-03-17.250).
+    """
     params = {
         "query_embedding": query_embedding,
-        "match_count": match_count,
+        "match_count": match_count * 3 if exclude_linkedin else match_count,
         "similarity_threshold": similarity_threshold,
     }
     if exclude_article_id is not None:
         params["exclude_article_id"] = exclude_article_id
     result = client.rpc("match_chunks", params).execute()
-    return result.data
+    chunks = result.data or []
+    if exclude_linkedin:
+        chunks = [c for c in chunks if not _is_linkedin_slug(c.get("article_url_slug", ""))]
+        chunks = chunks[:match_count]
+    return chunks
+
+
+def _is_linkedin_slug(slug: str) -> bool:
+    """LinkedIn cross-posts have slugs like 'linkedin.2025-03-17.250' or 'linkedin-694533...'."""
+    return slug.startswith("linkedin.") or slug.startswith("linkedin-")
 
 
 def get_article_count(client) -> int:

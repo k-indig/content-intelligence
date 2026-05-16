@@ -14,6 +14,15 @@ The glossary entry must have exactly these sections in this order:
 
 **[Term]**
 
+**Subtitle**
+A single sentence (max 140 characters) that previews the entry. Select the most striking, provocative, or interesting sentence from what will become the "Why it matters" section, verbatim or lightly tightened to fit the length. This becomes the preview copy in the Beehiiv post layout.
+
+**Meta title**
+A search-friendly title for the entry, max 60 characters. If the term reads naturally as a query (e.g. "What is zero-click search"), use that phrasing. Otherwise format it as "[Term]: Definition & Examples" or a similar disambiguator. Title case is fine here.
+
+**Meta description**
+A single sentence, max 155 characters, drawn from the definition in "What it means". It should stand alone as a SERP snippet — clear, specific, no marketing fluff.
+
 **What it means**
 A clear, concise definition (2–4 sentences). Base this on how Kevin has described or used the term across his articles — not generic textbook definitions.
 
@@ -24,7 +33,12 @@ Why this concept is important for SEO practitioners and growth teams (2–4 sent
 2–4 concrete, actionable steps or approaches for applying this concept. Frame it for practitioners — what would a growth team or SEO lead actually do with this? Base it on the provided excerpts where possible; use domain knowledge to fill gaps.
 
 **Growth Memo guidance**
-2–3 direct insights or quotes from Kevin's actual articles below. Use the exact wording where possible, or paraphrase closely. Each insight should be followed by its source in parentheses: (Source: [Article Title])
+2–3 direct insights or quotes from Kevin's actual articles below. Use the exact wording where possible, or paraphrase closely. Format each one as a markdown blockquote with the source as an inline hyperlink on the line below, like this:
+
+> The quoted insight goes here in a single blockquote line.
+> — [Article Title](full URL)
+
+Leave a blank line between each blockquote. Do not use parentheses around the source. Do not write "Source:" — just the em-dash and the linked title.
 
 **Related concepts**
 3–5 closely related terms, each with a one-sentence explanation of how it connects. Example format:
@@ -43,7 +57,7 @@ Keep the whole entry under 600 words. Do not invent content for the Growth Memo 
 WRITING STYLE RULES — follow these strictly:
 
 HARD BANS (never do these):
-- No em dashes (—). Use commas, colons, parentheses, or split into two sentences.
+- No em dashes (—) in prose. Use commas, colons, parentheses, or split into two sentences. The only exceptions are the attribution line of a Growth Memo guidance blockquote and the Related concepts bullet format.
 - No emoji in headings or bullets.
 - Sentence case for headings, not Title Case.
 - Bold sparingly — only for true labels, never for emphasis or decoration.
@@ -74,6 +88,22 @@ STYLE:
 def slug_to_url(slug: str) -> str:
     clean = re.sub(r"^\d+\.", "", slug)
     return f"{SUBSTACK_BASE_URL}/p/{clean}"
+
+
+_COLON_SENTENCE_RE = re.compile(r"(:\s+)([a-z])(?=[^\n]*?[.!?](?:\s|$))")
+
+
+def _capitalize_after_colon(text: str) -> str:
+    """Capitalize the first letter after a colon when an independent clause follows.
+
+    Heuristic: only capitalize when the text after the colon (up to the next
+    line break) contains a sentence-ending punctuation mark, which signals a
+    full sentence rather than a fragment or list item. Skips URLs (e.g. https://)
+    by requiring the colon to be followed by whitespace.
+    """
+    def repl(match: re.Match) -> str:
+        return match.group(1) + match.group(2).upper()
+    return _COLON_SENTENCE_RE.sub(repl, text)
 
 
 def _dedup_references(text: str) -> str:
@@ -133,4 +163,7 @@ def build_glossary_entry(term: str, chunks: list[dict]) -> str:
             }
         ],
     )
-    return _dedup_references(response.content[0].text)
+    text = response.content[0].text
+    text = _dedup_references(text)
+    text = _capitalize_after_colon(text)
+    return text

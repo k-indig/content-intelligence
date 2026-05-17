@@ -46,6 +46,22 @@ def html_to_markdown(html_content: str) -> str:
     return md(str(soup), heading_style="ATX", strip=["img"]).strip()
 
 
+def extract_title_from_html(html_content: str) -> str:
+    """Pull a clean title from the article HTML, preferring <h1> over <title>.
+
+    Substack exports often lack a <title> with the post name, so try the first
+    <h1> (usually the post heading) before falling back to <title>.
+    """
+    soup = BeautifulSoup(html_content, "html.parser")
+    h1 = soup.find("h1")
+    if h1 and h1.get_text(strip=True):
+        return h1.get_text(strip=True)
+    title_tag = soup.find("title")
+    if title_tag and title_tag.get_text(strip=True):
+        return title_tag.get_text(strip=True)
+    return ""
+
+
 def parse_substack_export(zip_path: str) -> list[dict]:
     """Parse a Substack ZIP export into a list of article dicts.
 
@@ -80,7 +96,14 @@ def parse_substack_export(zip_path: str) -> list[dict]:
             bare_slug = filename.replace("posts/", "").replace(".html", "")
             meta = metadata_map.get(bare_slug, {})
 
-        title = meta.get("title", slug.replace("-", " ").title())
+        # Title source order: CSV metadata → HTML <h1>/<title> → titleized slug.
+        # The titleized-slug fallback produces garbage like "Googles Ai Mode Seo
+        # Impact Ai Mode", so we try HTML extraction first.
+        title = meta.get("title", "").strip()
+        if not title:
+            title = extract_title_from_html(content)
+        if not title:
+            title = slug.replace("-", " ").title()
         word_count = len(markdown.split())
 
         article = {

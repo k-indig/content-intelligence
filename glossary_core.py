@@ -29,7 +29,7 @@ A clear, concise definition (2–4 sentences). Base this on how Kevin has descri
 **Why it matters**
 Why this concept is important for SEO practitioners and growth teams (2–4 sentences). Ground it in the practical implications Kevin has written about. Then include at least one concrete example that illustrates the concept in action. The example can be fictional but must be realistic and specific enough to make the concept tangible (e.g. a made-up brand, a specific metric shift, a before/after scenario).
 
-**How to use it**
+**How to use this knowledge**
 2–4 concrete, actionable steps or approaches for applying this concept. Frame it for practitioners — what would a growth team or SEO lead actually do with this? Base it on the provided excerpts where possible; use domain knowledge to fill gaps.
 
 **Growth Memo guidance**

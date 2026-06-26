@@ -30,6 +30,26 @@ with col2:
         help="Higher = stricter match. Lower = casts a wider net."
     )
 
+with st.expander("Editorial direction (optional)"):
+    angle = st.text_input(
+        "Angle / point of view",
+        placeholder="e.g. frame this for B2B SaaS teams measuring AI visibility",
+        help="Steers the entry toward a specific POV. Leave blank to let the "
+             "articles drive it.",
+    )
+    notes = st.text_area(
+        "Notes for the writer",
+        placeholder="Anything the draft should account for…",
+        height=80,
+    )
+    links_raw = st.text_input(
+        "Known source links",
+        placeholder="URLs where this term is already discussed (space-separated)",
+        help="Dropped into the prompt so the entry can weave them in where they fit.",
+    )
+
+source_links = [u.strip() for u in links_raw.split() if u.strip()] if links_raw else []
+
 if st.button("Build glossary entry", disabled=not term.strip()):
     with st.spinner(f"Searching {match_count} most relevant Growth Memo passages…"):
         embedding = embed_single(term)
@@ -59,7 +79,9 @@ if st.button("Build glossary entry", disabled=not term.strip()):
             st.markdown(f"- [{info['title']}]({info['url']})")
 
     with st.spinner("Writing glossary entry…"):
-        entry = build_glossary_entry(term, chunks)
+        entry = build_glossary_entry(
+            term, chunks, angle=angle, notes=notes, source_links=source_links
+        )
 
     st.divider()
     st.markdown(entry)

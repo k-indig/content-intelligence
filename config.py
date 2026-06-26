@@ -40,6 +40,13 @@ CLAUDE_MODEL = "claude-sonnet-4-5-20250929"
 # Newsletter config
 SUBSTACK_BASE_URL = "https://www.growth-memo.com"
 
+# Glossary content sections. These map to the content tags that drive the
+# section tabs on the Beehiiv library site (AI Research, SEO, Behavior,
+# Foundations). The glossary generator recommends one of these per entry so
+# whoever publishes knows which content tag to apply. A post published with
+# no matching content tag does not appear in any section feed on the site.
+GLOSSARY_SECTIONS = ["AI Research", "SEO", "Behavior", "Foundations"]
+
 # Google Analytics / Search Console config
 GA4_PROPERTY_ID = _get_secret("GA4_PROPERTY_ID")
 GSC_SITE_URL = _get_secret("GSC_SITE_URL")

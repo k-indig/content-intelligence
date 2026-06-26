@@ -4,15 +4,23 @@ import re
 
 import anthropic
 
-from config import ANTHROPIC_API_KEY, CLAUDE_MODEL, SUBSTACK_BASE_URL
+from config import (
+    ANTHROPIC_API_KEY,
+    CLAUDE_MODEL,
+    GLOSSARY_SECTIONS,
+    SUBSTACK_BASE_URL,
+)
 
 SYSTEM_PROMPT = """You are a writing assistant for Kevin Indig, author of the Growth Memo newsletter about SEO, organic growth, and AI search.
 
 Your job is to write a glossary entry for a term or concept based on how Kevin has actually used and explained it across his articles. Write in Kevin's voice: direct, analytical, practitioner-focused. No fluff.
 
-The glossary entry must have exactly these sections in this order. Use a level-1 markdown heading (#) for the term and level-2 headings (##) for each body section. The Subtitle, Meta title, and Meta description are metadata fields — keep each as a bold label on its own line with the value below it.
+The glossary entry must have exactly these sections in this order. Use a level-1 markdown heading (#) for the term and level-2 headings (##) for each body section. The Suggested section, Subtitle, Meta title, and Meta description are metadata fields — keep each as a bold label on its own line with the value below it.
 
 # [Term]
+
+**Suggested section**
+The single best-fitting section for this entry, chosen from the list of available sections provided in the prompt. Output only the section name, exactly as written in that list. This tells whoever publishes the entry which content tag to apply so it appears in the right tab on the site.
 
 **Subtitle**
 A single sentence (max 140 characters) that previews the entry. Select the most striking, provocative, or interesting sentence from what will become the "Why it matters" section, verbatim or lightly tightened to fit the length. This becomes the preview copy in the Beehiiv post layout.
@@ -28,7 +36,7 @@ The first body section is conditional on the input:
 - For a question or query (the input is phrased as a question), use the heading "## The quick answer" followed by a direct, succinct answer to the question rather than a definition.
 
 ## Why it matters
-Why this concept is important for SEO practitioners and growth teams (2–4 sentences). Ground it in the practical implications Kevin has written about. Then include at least one concrete example that illustrates the concept in action. The example can be fictional but must be realistic and specific enough to make the concept tangible (e.g. a made-up brand, a specific metric shift, a before/after scenario).
+Why this concept is important for SEO practitioners and growth teams (2–4 sentences). Ground it in the practical implications Kevin has written about. Then include at least one concrete example that illustrates the concept in action. The example must be hypothetical and clearly signposted as hypothetical: open it with framing like "Say a..." or "Imagine a...", and use a generic descriptor ("a mid-market B2B SaaS company", "a DTC skincare brand") rather than a real, named company. Never name a real, identifiable company, product, person, or publication in an example, even when a real one would fit — the reader must never be able to mistake the example for a documented case study. Keep it specific with a concrete metric shift or before/after scenario, but the specificity comes from the numbers and the scenario, not from borrowing a real brand's name.
 
 ## How to use this knowledge
 2–4 concrete, actionable steps or approaches for applying this concept. Frame it for practitioners — what would a growth team or SEO lead actually do with this? Base it on the provided excerpts where possible; use domain knowledge to fill gaps.
@@ -132,7 +140,45 @@ def _dedup_references(text: str) -> str:
     return before + "\n".join(deduped_lines)
 
 
-def build_glossary_entry(term: str, chunks: list[dict]) -> str:
+def _build_direction_block(
+    angle: str = "",
+    notes: str = "",
+    source_links: list[str] | None = None,
+) -> str:
+    """Format the editor's optional steering input for the prompt.
+
+    Returns an empty string when no direction was provided, so terms with no
+    notes generate exactly as before.
+    """
+    parts = []
+    if angle and angle.strip():
+        parts.append(f"Angle / point of view to take: {angle.strip()}")
+    if notes and notes.strip():
+        parts.append(f"Editor notes: {notes.strip()}")
+    if source_links:
+        links = "\n".join(f"- {url}" for url in source_links if url and url.strip())
+        if links:
+            parts.append(
+                "The editor flagged these existing URLs as places this term is "
+                "discussed. Use them where they strengthen the entry (for example "
+                "in Growth Memo guidance or Referenced in these Growth Memos), but "
+                "only if they genuinely fit:\n" + links
+            )
+    if not parts:
+        return ""
+    return (
+        "\n\nEditorial direction from the editor — follow it closely, it reflects "
+        "the angle this entry should take:\n" + "\n\n".join(parts)
+    )
+
+
+def build_glossary_entry(
+    term: str,
+    chunks: list[dict],
+    angle: str = "",
+    notes: str = "",
+    source_links: list[str] | None = None,
+) -> str:
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
     seen_articles = {}
@@ -155,6 +201,16 @@ def build_glossary_entry(term: str, chunks: list[dict]) -> str:
 
     context = "\n\n---\n\n".join(context_blocks)
 
+    sections = ", ".join(GLOSSARY_SECTIONS)
+    direction = _build_direction_block(angle, notes, source_links)
+
+    user_content = (
+        f"Write a glossary entry for this term: **{term}**\n\n"
+        f"Available sections (pick exactly one for the Suggested section field): {sections}"
+        f"{direction}\n\n"
+        f"Here are excerpts from Kevin's Growth Memo articles that reference it:\n\n{context}"
+    )
+
     response = client.messages.create(
         model=CLAUDE_MODEL,
         max_tokens=2000,
@@ -162,7 +218,7 @@ def build_glossary_entry(term: str, chunks: list[dict]) -> str:
         messages=[
             {
                 "role": "user",
-                "content": f"Write a glossary entry for this term: **{term}**\n\nHere are excerpts from Kevin's Growth Memo articles that reference it:\n\n{context}",
+                "content": user_content,
             }
         ],
     )

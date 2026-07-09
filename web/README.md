@@ -3,34 +3,66 @@
 Source of truth for the public **Growth Memo Glossary** page hosted at
 <https://library.growth-memo.com/> (the site homepage).
 
-## `glossary.html`
+## Files
 
-The full HTML/CSS/JS for the glossary. It is deployed by **pasting it into the
-custom-code block of the beehiiv Home page** (beehiiv → Website → Home). beehiiv
-does not expose that block through its API, so deploying is a manual copy-paste
-and this file is the canonical copy.
+- **`glossary.html`** — the full page (HTML/CSS/JS). Deployed by pasting it into
+  the custom-code block of the beehiiv Home page (beehiiv → Website → Home).
+  beehiiv does not expose that block through its API, so this one paste is
+  manual and only needs to happen **once**. After that the page updates itself.
+- **`glossary.json`** — the term list the page renders. **Generated, do not edit
+  by hand.** Rebuilt from the published beehiiv posts by the GitHub Action.
+- **`build_glossary.py`** — generator that lists published beehiiv posts and
+  writes `glossary.json`, mapping each post's content tag to a category chip.
 
-### How the page works
+## How updates flow (automated)
 
-The page renders a searchable, A–Z, category-filtered index from a `terms`
-array hardcoded in the `<script>`. There is **no live connection to beehiiv** —
-the array must be kept in sync with the published glossary posts by hand.
+```
+publish post in beehiiv
+        │
+        ▼
+scheduled GitHub Action  (.github/workflows/update-glossary.yml, hourly)
+   runs build_glossary.py → rewrites glossary.json → commits if changed
+        │
+        ▼
+jsDelivr CDN cache purged  →  glossary.html fetches glossary.json on load
+        │
+        ▼
+new term appears on the homepage (no manual edits)
+```
 
-Each term is `{ name, url, cat }`:
+`glossary.html` fetches `glossary.json` from jsDelivr at page load, so once the
+block is pasted into beehiiv it never needs to change again. The embedded
+`FALLBACK_TERMS` array in the page is only used if that fetch fails.
 
-- `name` — the post title
-- `url` — `https://library.growth-memo.com/p/<slug>`
-- `cat` — one of `ai | seo | behavior | foundations`, matching the post's
-  beehiiv **content tag** (`AI Research → ai`, `SEO → seo`, `Behavior →
-  behavior`, `Foundations → foundations`)
+## One-time setup
 
-### Updating after publishing new glossary posts
+1. **Add the beehiiv API key** as a repo secret named `BEEHIIV_API_KEY`
+   (GitHub → repo → Settings → Secrets and variables → Actions → New repository
+   secret). A read-scoped beehiiv **v2 API key** is enough.
+2. **Merge this to `master`.** Scheduled workflows only run from the default
+   branch, so the hourly job goes live after merge. You can also trigger it any
+   time from the Actions tab via **Run workflow**.
+3. **Paste `glossary.html`** into the beehiiv Home page custom-code block once.
 
-1. Add one row to the `terms` array per new post (keep it alphabetical).
-2. Set `cat` to match the post's beehiiv content tag. A post with no content
-   tag will not appear in any beehiiv tag section and should still be given a
-   `cat` here so it shows in the glossary.
-3. Update the "Last synced" comment above the array.
-4. Copy the whole file into the beehiiv Home page custom-code block and publish.
+## Category mapping
 
-Last synced: 2026-07-08 — 35 published posts.
+Each term's `cat` comes from the post's beehiiv **content tag**:
+
+| beehiiv content tag | glossary category (`cat`) | chip label   |
+| ------------------- | ------------------------- | ------------ |
+| AI Research         | `ai`                      | AI Search    |
+| SEO                 | `seo`                     | SEO          |
+| Behavior            | `behavior`                | Behavior     |
+| Foundations         | `foundations`             | Foundations  |
+
+A published post with **no** recognized content tag still appears in the
+glossary, just without a category badge (and the generator logs a warning). Tag
+your posts on publish to keep categories correct. To add a new category, update
+both `TAG_TO_CAT` in `build_glossary.py` and the `CATEGORIES` array in
+`glossary.html`.
+
+## Running the generator locally
+
+```bash
+BEEHIIV_API_KEY=your_key python web/build_glossary.py --out web/glossary.json
+```

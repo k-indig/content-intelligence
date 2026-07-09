@@ -350,21 +350,16 @@
     { id: "foundations", label: "Foundations", class: "cat-foundations", color: "#6b21a8" }
   ];
 
-  // ---------------------------------------------------------------------------
-  // Glossary terms. This list is maintained MANUALLY and must be kept in sync
-  // with the published posts in beehiiv (beehiiv's custom-code block cannot be
-  // updated through the API, so there is no way to fully automate this).
-  //
-  // TO UPDATE after publishing new glossary posts:
-  //   1. Add one row per new post: { name, url, cat }.
-  //      - name: the post title
-  //      - url:  https://library.growth-memo.com/p/<slug>
-  //      - cat:  ai | seo | behavior | foundations  (match its beehiiv content tag)
-  //   2. Keep it alphabetical for easy scanning (display re-sorts anyway).
-  //
-  // Last synced: 2026-07-08 — 35 published posts.
-  // ---------------------------------------------------------------------------
-  const terms = [
+  // Glossary data URL. glossary.json is rebuilt from the published beehiiv
+  // posts by a scheduled GitHub Action (.github/workflows/update-glossary.yml)
+  // and served from the repo via the jsDelivr CDN. The page loads it at
+  // runtime, so publishing a new post updates this page automatically with no
+  // edits here.
+  const GLOSSARY_JSON_URL = "https://cdn.jsdelivr.net/gh/k-indig/content-intelligence@master/web/glossary.json";
+
+  // Offline fallback, used only if the fetch above fails. Snapshot of the
+  // terms at last edit; the live list comes from GLOSSARY_JSON_URL.
+  const FALLBACK_TERMS = [
     { name: "Answer Engine",                            url: "https://library.growth-memo.com/p/answer-engine",                       cat: "ai" },
     { name: "Are LLMs and NLPs the same?",              url: "https://library.growth-memo.com/p/are-llms-and-nlps-the-same",          cat: "foundations" },
     { name: "Astroturfing",                             url: "https://library.growth-memo.com/p/astroturfing",                        cat: "behavior" },
@@ -401,6 +396,9 @@
     { name: "Vectorization",                            url: "https://library.growth-memo.com/p/vectorization",                       cat: "ai" },
     { name: "What is Answer Engine Optimization?",      url: "https://library.growth-memo.com/p/what-is-answer-engine-optimization",  cat: "ai" }
   ];
+
+  // `terms` starts as the fallback and is replaced by the fetched list on load.
+  let terms = FALLBACK_TERMS.slice();
 
   const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   let activeCat = "all";
@@ -519,8 +517,21 @@ const searchEl = document.getElementById("searchInput");
   searchEl.addEventListener("change", handleSearch);
   searchEl.oninput = handleSearch;
 
-  renderFilters();
-  render();
+  async function init() {
+    try {
+      const res = await fetch(GLOSSARY_JSON_URL, { cache: "no-cache" });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length) terms = data;
+      }
+    } catch (e) {
+      // Network/CDN hiccup — fall back to the embedded snapshot.
+    }
+    renderFilters();
+    render();
+  }
+
+  init();
   </script>
 
 </body>

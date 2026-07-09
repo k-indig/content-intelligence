@@ -1,0 +1,58 @@
+name: Update glossary
+
+# Rebuilds web/glossary.json from the published beehiiv posts and commits it
+# when it changes, then purges the jsDelivr CDN cache so the public glossary
+# homepage (library.growth-memo.com) picks up the change within minutes.
+#
+# NOTE: scheduled workflows only run from the repository's DEFAULT branch, so
+# this automation goes live once this file is merged to `master`. Use the
+# "Run workflow" button (workflow_dispatch) to trigger it on demand.
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # hourly; change to "0 6 * * *" for once daily at 06:00 UTC
+  workflow_dispatch: {}
+
+concurrency:
+  group: update-glossary
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Rebuild glossary.json
+        env:
+          BEEHIIV_API_KEY: ${{ secrets.BEEHIIV_API_KEY }}
+        run: python web/build_glossary.py --out web/glossary.json
+
+      - name: Commit if changed
+        id: commit
+        run: |
+          if git diff --quiet -- web/glossary.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No glossary changes."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/glossary.json
+          git commit -m "chore: sync glossary.json from beehiiv [skip ci]"
+          git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Purge jsDelivr cache
+        if: steps.commit.outputs.changed == 'true'
+        run: |
+          curl -sS --fail-with-body \
+            "https://purge.jsdelivr.net/gh/${GITHUB_REPOSITORY}@master/web/glossary.json" \
+            || echo "jsDelivr purge request failed (cache will expire on its own)."

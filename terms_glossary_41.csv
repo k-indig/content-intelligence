@@ -1,0 +1,42 @@
+term,status,angle,notes,links
+open weight large language model (LLM),,,Mentioned in AI halftime report H1 2026,
+open source Large Language Model (LLM),,,Mentioned in AI halftime report H1 2026,
+AI mention (also referred to as brand mention),,,Mentioned in AI halftime report H1 2026,
+AI citation (also referred to as a brand citation),,,Mentioned in AI halftime report H1 2026,
+Ghost citation,,,Mentioned in AI halftime report H1 2026,
+AI tokens,,,Mentioned in AI halftime report H1 2026,
+Agentic commerce (also referred to as agentic shopping),,,Mentioned in AI halftime report H1 2026,
+"agentic commerce protocols (ACP, UCP)",,,Mentioned in AI halftime report H1 2026,
+Inventory indexation,,The process of determining which product or listing pages should be crawled and included in search indexes. Helps control crawl budget and maintain content quality.,,https://www.growth-memo.com/p/effective-marketplace-seo-is-more
+LLM citation,,"what it is and why it matters for SEOs; angle: LLM citations are the inline source attributions an AI engine displays alongside a generated answer, representing the chunks the retriever pulled and the generator chose to credit",,
+LLM experience gain,,"first heard used by Zack Notes (https://www.linkedin.com/in/zack-notes-7600152a/); basically, creating new experiences with LLMs across your content/website by incorporating interactive AI features to provide a better user experience",,
+LLM leaderboards,,This one is interesting. More visibility and understanding needs to be out there about these for those building technologies and incorporating the best LLM / gen AI model for their work.,How companies in growth mode building new technologies can utilize these public leaderboards to make the best model decisions for their own technology,
+LLMs,,"LLMs are closed systems frozen at training, which is why every ""AI SEO"" tactic that targets the model itself is misdirected effort: the leverage sits in what gets retrieved at query time, not what the model already knows.",,
+long-tail queries,,what they are and why they matter for SEO; users are increasingly searching with more words and phrases,,https://www.growth-memo.com/p/how-to-measure-topical-authority
+Marketplace SEO,,"SEO strategies tailored to online platforms that connect supply and demand (e.g., Etsy, Zillow, Fiverr). It involves optimizing large volumes of dynamically generated pages at scale.",,https://www.growth-memo.com/p/effective-marketplace-seo-is-more
+microagents,,What and why this matters for growth teams/leaders,Building and using custom agents to 10x the work,
+NEG SEO,,what it is / how to protect your site / what and why this matters for growth teams/leaders/SEOs,,
+NLPs,,what and why this matters for growth teams/leaders/SEOs,,
+PR SEO,,"""PR SEO"" is a strategy, likely using public relations and/or press releases to boost SEO",,
+query relevance,,"Basically search intent, but discussing embedding similarity and why this matters to understand LLM optimization",Query relevance in relationship to hyperspecific LLM results to queries,
+Query share,,A metric representing how much of the search demand for a given topic a site or page captures through rankings. Used as a proxy for topical authority.,,https://www.growth-memo.com/p/how-to-measure-topical-authority
+Query universe,,The total set of search queries that relate to a specific topic. Mapping this is the first step to measuring and optimizing topical authority.,,https://www.growth-memo.com/p/how-to-measure-topical-authority
+Ranking overlap,,"The portion of queries or topics where multiple sites rank, used to assess topical competitiveness and authority.",,https://www.growth-memo.com/p/how-to-measure-topical-authority
+relevance engineering,,what and why this matters for growth teams/leaders/SEOs,the goal to transition us from using SEO to using a term that we actually do that's more connected to brand and authority,
+retreival augmented gen LLMs,,what and why this matters for growth teams/leaders/SEOs,,
+Retrieval Surface Optimization,,what and why this matters for growth teams/leaders/SEOs,,
+SEO AI agents,,what and why this matters for growth teams/leaders/SEOs,Building and using custom agents to 10x the work,
+SEO moat,,A competitive advantage that protects a site's search rankings by making it difficult for others to outrank without significant investment in content depth and breadth.,,https://www.growth-memo.com/p/how-to-measure-topical-authority
+SEO RFP,,"This is a bit more generic, but there are too many people who don't have understanding of what this is.",,
+SERP coverage,,The breadth and depth of a website's visibility across search engine results pages (SERPs) for a given topic.,,https://www.growth-memo.com/p/how-to-measure-topical-authority
+static pretrained LLMs,,What and why this matters for growth teams/leaders,,
+Supply and demand (in SEO context),,"In marketplace SEO, ""supply"" refers to product/service listings, while ""demand"" refers to the search queries or buyer interest. SEO strategy must bridge this gap effectively.",,https://www.growth-memo.com/p/effective-marketplace-seo-is-more
+time to value,,"A term borrowed from product/UX, but we should create an entry for ""time to value"" in relationship to SEO: from organic search / answer engines to the actual site that users link out to, since that will have to be prioritized in the new era of search and fewer clicks",,
+Topic graph,,what and why this matters for growth teams/leaders/SEOs,,https://www.growth-memo.com/p/how-to-measure-topical-authority
+topical relevance,,"The transition from calling ""topical authority"" as ""topical relevance"" due to actual Google doc leaks and how topical relevance is the same concept.",,
+Traffic cannibalization,,"what and why this matters for growth teams/leaders/SEOs; the angle is not just traffic cannibalization by your own pages, but also by AI search surfaces/AI search methods",,
+Traffic per query,,An estimate of how much traffic each query brings. Used in calculating query share and evaluating the value of coverage.,,https://www.growth-memo.com/p/how-to-measure-topical-authority
+user intent alignment,,Why this matters to growth leaders: understanding LLMs and how to earn visibility in them,,
+User-generated content (UGC),,"Content like reviews, comments, or seller descriptions created by users. Helps differentiate otherwise thin or duplicate marketplace pages.",,https://www.growth-memo.com/p/effective-marketplace-seo-is-more
+zero volume search queries,,what and why this matters for growth teams/leaders/SEOs,,https://www.growth-memo.com/p/how-to-measure-topical-authority
+Agent readiness,,determining the AI agent readiness of your website,,

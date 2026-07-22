@@ -7,3 +7,9 @@ venv/
 dist/
 build/
 .streamlit/secrets.toml
+
+# Glossary generation intermediates (regenerable) and scratch files
+gen_entries/
+retrieval_manifest.json
+draft_payloads/
+scratchpad_*.py

@@ -1,5 +1,30 @@
 [
   {
+    "name": "Agentic commerce",
+    "url": "https://library.growth-memo.com/p/agentic-commerce",
+    "cat": "ai"
+  },
+  {
+    "name": "Agentic commerce protocols (ACP, UCP)",
+    "url": "https://library.growth-memo.com/p/agentic-commerce-protocols-acp-ucp",
+    "cat": "seo"
+  },
+  {
+    "name": "AI citation (also referred to as a brand citation)",
+    "url": "https://library.growth-memo.com/p/ai-citation-brand-citation",
+    "cat": "ai"
+  },
+  {
+    "name": "AI mention (also referred to as brand mention)",
+    "url": "https://library.growth-memo.com/p/ai-mentions-brand-mentions",
+    "cat": "ai"
+  },
+  {
+    "name": "AI tokens",
+    "url": "https://library.growth-memo.com/p/ai-tokens",
+    "cat": "foundations"
+  },
+  {
     "name": "Answer Engine",
     "url": "https://library.growth-memo.com/p/answer-engine",
     "cat": "ai"
@@ -75,6 +100,11 @@
     "cat": "ai"
   },
   {
+    "name": "Ghost citation",
+    "url": "https://library.growth-memo.com/p/ghost-citation",
+    "cat": "ai"
+  },
+  {
     "name": "Google Bard",
     "url": "https://library.growth-memo.com/p/google-bard",
     "cat": "ai"
@@ -102,6 +132,16 @@
   {
     "name": "Microsoft Prometheus",
     "url": "https://library.growth-memo.com/p/microsoft-prometheus",
+    "cat": "ai"
+  },
+  {
+    "name": "Open source Large Language Model (LLM)",
+    "url": "https://library.growth-memo.com/p/open-source-large-language-model-llm",
+    "cat": "ai"
+  },
+  {
+    "name": "Open weight large language model (LLM)",
+    "url": "https://library.growth-memo.com/p/open-weight-large-language-model-llm",
     "cat": "ai"
   },
   {

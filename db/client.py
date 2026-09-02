@@ -128,6 +128,15 @@ def upsert_article_metrics(client, rows: list[dict]):
 
 def upsert_article_queries(client, rows: list[dict]):
     """Upsert article_queries rows in batches."""
+    keys = [
+        (row["url_slug"], row["week_start"], row["query"])
+        for row in rows
+    ]
+    if len(keys) != len(set(keys)):
+        raise ValueError(
+            "article_queries rows must be unique by url_slug, week_start, and query"
+        )
+
     BATCH = 50
     for i in range(0, len(rows), BATCH):
         batch = rows[i : i + BATCH]

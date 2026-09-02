@@ -107,21 +107,36 @@ def fetch_article_markdown(url: str) -> str | None:
 
 # ── Existing slug lookup ─────────────────────────────────────────────────────
 
-def get_existing_slugs(client) -> set[str]:
-    """Return the set of url_slug values already in the database."""
-    result = client.table("articles").select("url_slug").execute()
-    return {row["url_slug"] for row in result.data}
+def get_existing_slugs(client, candidate_slugs: list[str]) -> set[str]:
+    """Return candidate slugs that already exist in the database."""
+    existing = set()
+    unique_slugs = list(dict.fromkeys(candidate_slugs))
+    batch_size = 100
+
+    for i in range(0, len(unique_slugs), batch_size):
+        batch = unique_slugs[i : i + batch_size]
+        result = (
+            client.table("articles")
+            .select("url_slug")
+            .in_("url_slug", batch)
+            .execute()
+        )
+        existing.update(row["url_slug"] for row in result.data)
+
+    return existing
 
 
 # ── Main ingestion ───────────────────────────────────────────────────────────
 
 def ingest_rss(max_articles: int = 20):
     client = get_client()
-    existing = get_existing_slugs(client)
     print(f"Database has {get_article_count(client)} articles. "
           f"Checking RSS feed for new ones…")
 
     feed_articles = fetch_rss()
+    existing = get_existing_slugs(
+        client, [article["slug"] for article in feed_articles]
+    )
     new_articles = [a for a in feed_articles if a["slug"] not in existing]
 
     if not new_articles:

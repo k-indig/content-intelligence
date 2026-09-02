@@ -8,6 +8,7 @@ Only processes article pages (paths containing /p/).
 import argparse
 import sys
 from datetime import date, timedelta
+from urllib.parse import urlsplit
 
 from google.analytics.data_v1beta import BetaAnalyticsDataClient
 from google.analytics.data_v1beta.types import (
@@ -24,7 +25,6 @@ from googleapiclient.discovery import build
 from config import GA4_PROPERTY_ID, GSC_SITE_URL
 from db.client import (
     get_client,
-    get_existing_metric_weeks,
     upsert_article_metrics,
     upsert_article_queries,
 )
@@ -35,9 +35,10 @@ from ingestion.google_auth import get_ga4_credentials, get_gsc_credentials
 
 def _extract_slug(path_or_url: str) -> str | None:
     """Extract article slug from a GA/GSC path like /p/some-slug or full URL."""
-    if "/p/" not in path_or_url:
+    path = urlsplit(path_or_url).path
+    if "/p/" not in path:
         return None
-    slug = path_or_url.split("/p/")[-1].rstrip("/").split("?")[0]
+    slug = path.split("/p/", 1)[1].strip("/")
     return slug if slug else None
 
 
@@ -154,20 +155,60 @@ def fetch_gsc_query_data(week_start: date, week_end: date) -> list[dict]:
         },
     ).execute()
 
-    results = []
-    for row in response.get("rows", []):
+    response_rows = response.get("rows", [])
+    results = _aggregate_gsc_query_rows(response_rows, week_start)
+    article_row_count = sum(
+        1 for row in response_rows if _extract_slug(row["keys"][0])
+    )
+    duplicate_count = article_row_count - len(results)
+    if duplicate_count:
+        print(
+            f"  Aggregated {duplicate_count} duplicate GSC query rows "
+            "after URL normalization"
+        )
+    return results
+
+
+def _aggregate_gsc_query_rows(rows: list[dict], week_start: date) -> list[dict]:
+    """Aggregate page variants into unique article/query rows for one week."""
+    grouped = {}
+    week = str(week_start)
+
+    for row in rows:
         slug = _extract_slug(row["keys"][0])
         if not slug:
             continue
-        results.append({
-            "url_slug": slug,
-            "week_start": str(week_start),
-            "query": row["keys"][1],
-            "clicks": int(row["clicks"]),
-            "impressions": int(row["impressions"]),
-            "ctr": round(row["ctr"], 4),
-            "avg_position": round(row["position"], 1),
-        })
+
+        query = row["keys"][1]
+        key = (slug, week, query)
+        aggregate = grouped.setdefault(
+            key,
+            {
+                "url_slug": slug,
+                "week_start": week,
+                "query": query,
+                "clicks": 0,
+                "impressions": 0,
+                "position_impressions": 0.0,
+            },
+        )
+        impressions = int(row["impressions"])
+        aggregate["clicks"] += int(row["clicks"])
+        aggregate["impressions"] += impressions
+        aggregate["position_impressions"] += float(row["position"]) * impressions
+
+    results = []
+    for aggregate in grouped.values():
+        impressions = aggregate.pop("impressions")
+        position_impressions = aggregate.pop("position_impressions")
+        clicks = aggregate["clicks"]
+        aggregate["impressions"] = impressions
+        aggregate["ctr"] = round(clicks / impressions, 4) if impressions else 0
+        aggregate["avg_position"] = (
+            round(position_impressions / impressions, 1) if impressions else 0
+        )
+        results.append(aggregate)
+
     return results
 
 
@@ -177,7 +218,6 @@ def ingest_analytics(weeks: int = 4):
     """Fetch GA4 + GSC data for the last N weeks and upsert to Supabase."""
     client = get_client()
     target_weeks = _target_weeks(weeks)
-    existing = get_existing_metric_weeks(client)
 
     print(f"Fetching analytics for {weeks} weeks...")
 

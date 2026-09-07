@@ -170,6 +170,16 @@
     "cat": "ai"
   },
   {
+    "name": "Retrieval Surface Optimization",
+    "url": "https://library.growth-memo.com/p/retrieval-surface-optimization",
+    "cat": "seo"
+  },
+  {
+    "name": "Retrieval-augmented generation (RAG)",
+    "url": "https://library.growth-memo.com/p/retrieval-augmented-generation-rag",
+    "cat": "foundations"
+  },
+  {
     "name": "Retriever",
     "url": "https://library.growth-memo.com/p/retriever",
     "cat": "ai"
@@ -185,9 +195,24 @@
     "cat": "ai"
   },
   {
+    "name": "SEO AI agents",
+    "url": "https://library.growth-memo.com/p/seo-ai-agents",
+    "cat": "seo"
+  },
+  {
+    "name": "SEO moat",
+    "url": "https://library.growth-memo.com/p/seo-moat",
+    "cat": "seo"
+  },
+  {
     "name": "SEO persona",
     "url": "https://library.growth-memo.com/p/seo-persona",
     "cat": "seo"
+  },
+  {
+    "name": "SEO RFP",
+    "url": "https://library.growth-memo.com/p/seo-rfp",
+    "cat": "foundations"
   },
   {
     "name": "SERP coverage",

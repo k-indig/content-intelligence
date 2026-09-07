@@ -1,5 +1,10 @@
 [
   {
+    "name": "Agent readiness",
+    "url": "https://library.growth-memo.com/p/agent-readiness",
+    "cat": "seo"
+  },
+  {
     "name": "Agentic commerce",
     "url": "https://library.growth-memo.com/p/agentic-commerce",
     "cat": "ai"
@@ -130,6 +135,11 @@
     "cat": "seo"
   },
   {
+    "name": "LLM citation",
+    "url": "https://library.growth-memo.com/p/llm-citation",
+    "cat": "ai"
+  },
+  {
     "name": "Marketplace SEO",
     "url": "https://library.growth-memo.com/p/marketplace-seo",
     "cat": "seo"
@@ -180,14 +190,54 @@
     "cat": "seo"
   },
   {
+    "name": "SERP coverage",
+    "url": "https://library.growth-memo.com/p/serp-coverage",
+    "cat": "seo"
+  },
+  {
+    "name": "Static pretrained LLMs",
+    "url": "https://library.growth-memo.com/p/static-pretrained-llms",
+    "cat": "ai"
+  },
+  {
+    "name": "Supply and demand (in SEO context)",
+    "url": "https://library.growth-memo.com/p/supply-and-demand-in-seo-context",
+    "cat": "seo"
+  },
+  {
     "name": "Synthetic personas",
     "url": "https://library.growth-memo.com/p/synthetic-personas",
     "cat": "ai"
   },
   {
+    "name": "Time to value",
+    "url": "https://library.growth-memo.com/p/time-to-value",
+    "cat": "foundations"
+  },
+  {
     "name": "Top-k retrieval",
     "url": "https://library.growth-memo.com/p/top-k-retrieval",
     "cat": "ai"
+  },
+  {
+    "name": "Topic graph",
+    "url": "https://library.growth-memo.com/p/topic-graph",
+    "cat": "seo"
+  },
+  {
+    "name": "Topical relevance",
+    "url": "https://library.growth-memo.com/p/topical-relevance",
+    "cat": "seo"
+  },
+  {
+    "name": "Traffic cannibalization",
+    "url": "https://library.growth-memo.com/p/traffic-cannibalization",
+    "cat": "seo"
+  },
+  {
+    "name": "Traffic per query",
+    "url": "https://library.growth-memo.com/p/traffic-per-query",
+    "cat": "seo"
   },
   {
     "name": "Training data",
@@ -198,6 +248,16 @@
     "name": "Turn 1",
     "url": "https://library.growth-memo.com/p/turn-1",
     "cat": "ai"
+  },
+  {
+    "name": "User intent alignment",
+    "url": "https://library.growth-memo.com/p/user-intent-alignment",
+    "cat": "seo"
+  },
+  {
+    "name": "User-generated content (UGC)",
+    "url": "https://library.growth-memo.com/p/user-generated-content-ugc",
+    "cat": "seo"
   },
   {
     "name": "Validation click",
@@ -223,5 +283,10 @@
     "name": "What is Answer Engine Optimization?",
     "url": "https://library.growth-memo.com/p/what-is-answer-engine-optimization",
     "cat": "ai"
+  },
+  {
+    "name": "Zero-volume search queries",
+    "url": "https://library.growth-memo.com/p/zero-volume-search-queries",
+    "cat": "seo"
   }
 ]

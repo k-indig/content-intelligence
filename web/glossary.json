@@ -140,14 +140,34 @@
     "cat": "ai"
   },
   {
+    "name": "Long-tail queries",
+    "url": "https://library.growth-memo.com/p/long-tail-queries",
+    "cat": "seo"
+  },
+  {
     "name": "Marketplace SEO",
     "url": "https://library.growth-memo.com/p/marketplace-seo",
     "cat": "seo"
   },
   {
+    "name": "Microagents",
+    "url": "https://library.growth-memo.com/p/microagents",
+    "cat": "ai"
+  },
+  {
     "name": "Microsoft Prometheus",
     "url": "https://library.growth-memo.com/p/microsoft-prometheus",
     "cat": "ai"
+  },
+  {
+    "name": "NEG SEO",
+    "url": "https://library.growth-memo.com/p/neg-seo",
+    "cat": "seo"
+  },
+  {
+    "name": "NLPs",
+    "url": "https://library.growth-memo.com/p/nlps",
+    "cat": "foundations"
   },
   {
     "name": "Open source Large Language Model (LLM)",
@@ -160,6 +180,11 @@
     "cat": "ai"
   },
   {
+    "name": "PR SEO",
+    "url": "https://library.growth-memo.com/p/pr-seo",
+    "cat": "seo"
+  },
+  {
     "name": "Programmatic SEO",
     "url": "https://library.growth-memo.com/p/programmatic-seo",
     "cat": "seo"
@@ -168,6 +193,31 @@
     "name": "Query fan-out",
     "url": "https://library.growth-memo.com/p/query-fan-out",
     "cat": "ai"
+  },
+  {
+    "name": "Query relevance",
+    "url": "https://library.growth-memo.com/p/query-relevance",
+    "cat": "ai"
+  },
+  {
+    "name": "Query share",
+    "url": "https://library.growth-memo.com/p/query-share",
+    "cat": "seo"
+  },
+  {
+    "name": "Query universe",
+    "url": "https://library.growth-memo.com/p/query-universe",
+    "cat": "seo"
+  },
+  {
+    "name": "Ranking overlap",
+    "url": "https://library.growth-memo.com/p/ranking-overlap",
+    "cat": "seo"
+  },
+  {
+    "name": "Relevance engineering",
+    "url": "https://library.growth-memo.com/p/relevance-engineering",
+    "cat": "foundations"
   },
   {
     "name": "Retrieval Surface Optimization",
